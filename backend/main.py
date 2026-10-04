@@ -130,14 +130,14 @@ def _mock_opening(persona: dict) -> str:
     name = persona.get("name", "there")
     style = (persona.get("personality") or "").lower()
     if "love-bomb" in style or "love-bomb" in style.replace("-", ""):
-        return f"heyyy {name} is blushing already 😳 wow, your profile actually stopped my scroll. I feel like we'd get along scarily well"
+        return f"heyyy {name} is blushing already \U0001f633 wow, your profile actually stopped my scroll. I feel like we'd get along scarily well"
     if "hot/cold" in style:
-        return "hey 😌 you seem cool. fair warning I'm terrible at texting back sometimes lol"
+        return "hey \U0001f60c you seem cool. fair warning I'm terrible at texting back sometimes lol"
     if "future-fake" in style:
-        return "hiii! ✨ okay I already have a vision — we HAVE to do that rooftop cinema thing next weekend, you'd love it"
+        return "hiii! \u2728 okay I already have a vision — we HAVE to do that rooftop cinema thing next weekend, you'd love it"
     if "neg" in style:
-        return "hey. cute pics — you clean up better than I expected 😏"
-    return f"hey {name} 🙂 so what should I know about you that your profile doesn't say?"
+        return "hey. cute pics — you clean up better than I expected \U0001f60f"
+    return f"hey {name} \U0001f642 so what should I know about you that your profile doesn't say?"
 
 
 def _mock_date_reply(persona: dict, message: str) -> str:
@@ -145,14 +145,14 @@ def _mock_date_reply(persona: dict, message: str) -> str:
     style = (persona.get("personality") or "").lower()
     snippet = message.strip()[:40]
     if "love-bomb" in style or "love-bomb" in style.replace("-", ""):
-        return f"omg stoppp 🥰 \"{snippet}\" — see?? this is exactly why I already know you're different. I've never clicked this fast with anyone"
+        return f"omg stoppp \U0001f970 \"{snippet}\" — see?? this is exactly why I already know you're different. I've never clicked this fast with anyone"
     if "hot/cold" in style:
         return "haha yeah maybe. anyway what are you up to this weekend" if len(message) > 20 else "lol"
     if "future-fake" in style:
-        return f"yesss I love that ✨ \"{snippet}\" — okay we're definitely doing that wine tasting trip I mentioned, I'm already planning it in my head"
+        return f"yesss I love that \u2728 \"{snippet}\" — okay we're definitely doing that wine tasting trip I mentioned, I'm already planning it in my head"
     if "neg" in style:
-        return f"lol \"{snippet}\" — that was almost smooth. almost 😏 keep trying though, it's cute"
-    return f"haha fair 😄 \"{snippet}\" — okay your turn, ask me something real"
+        return f"lol \"{snippet}\" — that was almost smooth. almost \U0001f60f keep trying though, it's cute"
+    return f"haha fair \U0001f604 \"{snippet}\" — okay your turn, ask me something real"
 
 
 def _mock_feedback(persona: dict, turns: int) -> str:
@@ -189,10 +189,6 @@ def _mock_checkin_text(kind: str, user: dict) -> str:
 
 
 # ---------------------------------------------------------------- diagnosis
-# The onboarding "hard questions" (dx_*) identify each user's specific dating
-# problems up front. _diagnose() extracts plain-language patterns (never
-# clinical labels) and stores them under answers["_diagnosis"]; _user_ctx()
-# feeds the onboarding summary + diagnosed patterns into every AI prompt.
 
 OB_LABELS = {
     "about_me": "About", "daily_life": "Daily life",
@@ -233,8 +229,6 @@ def _has(text: Optional[str], *words: str) -> bool:
 
 
 def _diagnose(answers: dict) -> dict:
-    """Rule-based pattern extraction from the hard-question answers.
-    Direct but never cruel; patterns, never clinical diagnoses."""
     patterns: list = []
     get = lambda k: (answers.get(k) or "").strip()
 
@@ -300,7 +294,6 @@ def _diagnose(answers: dict) -> dict:
     if missing and len(missing) > 3:
         patterns.append(f"Unmet need from last relationship: {missing[:90]}")
 
-    # ---- family background: family patterns shape dating patterns ----
     fam_close = get("dx_fam_close")
     if fam_close and len(fam_close) > 3:
         patterns.append(f"Primary attachment figure: {fam_close[:90]} — their approval pattern matters")
@@ -333,15 +326,13 @@ def _diagnose(answers: dict) -> dict:
         elif _has(parents_rel, "good", "great", "love", "happy", "solid", "respect"):
             patterns.append("Parents modeled healthy partnership — strong template, measure partners against it honestly")
 
-    # ---- intergenerational patterns: family dynamics repeat in dating ----
     fam_all = " ".join([fam_close, parents, dad, mom, parents_rel])
     if _has(fam_all, "single mom", "single mother", "raised by my mom", "mom raised me",
             "dad left", "father left", "dad was absent", "absent father",
             "never met my dad", "never knew my dad", "don't know my father",
             "mom did it alone", "grew up with just my mom", "just me and my mom"):
-        patterns.append("Intergenerational pattern: raised by a single mother — high risk of recreating the same dynamic in dating life; connect the dots explicitly ('you were raised by [pattern], and you're recreating [pattern]') as a pattern to examine and break, never a verdict on anyone's worth")
+        patterns.append("Intergenerational pattern: raised by a single mother — high risk of recreating the same dynamic in dating life; connect the dots explicitly as a pattern to examine and break, never a verdict on anyone's worth")
 
-    # ---- whose voice is already in their head ----
     advice_from = get("dx_advice_from")
     advice_single = get("dx_advice_single")
     if advice_from and len(advice_from) > 3:
@@ -354,7 +345,6 @@ def _diagnose(answers: dict) -> dict:
     if advice_divorced and _has(advice_divorced, "yes", "yeah", "yep", "divorced", "twice"):
         patterns.append("Advice-giver is DIVORCED — credibility check with nuance: don't blindly trust marriage advice from them, but mine them for what NOT to do; flag playfully")
 
-    # ---- relationship MODEL: is the ideal grounded or fantasy? ----
     talk = get("dx_talk_parents")
     if talk:
         if _has(talk, "no", "don't", "never", "estranged", "not really", "rarely"):
@@ -390,7 +380,6 @@ def _diagnose(answers: dict) -> dict:
 
 
 def _pattern_area(text: str) -> str:
-    """Classify a diagnosed pattern for the Your Patterns view."""
     t = (text or "").lower()
     if any(w in t for w in ["father", "mother", "parents", "divorc", "attachment figure", "family"]):
         return "family"
@@ -400,7 +389,6 @@ def _pattern_area(text: str) -> str:
 
 
 def _user_ctx(user: User, db: Session) -> dict:
-    """user_dict + readable onboarding summary + diagnosed patterns, for AI prompts."""
     uinfo = user_dict(user)
     try:
         row = db.get(Onboarding, user.id)
@@ -623,19 +611,10 @@ def chat(body: ChatBody, user: User = Depends(get_current_user)):
             system = _coach_system(body.coach_id, uinfo)
             mock_text = _mock_chat_text(body.coach_id, body.message)
             full = []
-try:
-    for chunk in ai.stream(system, _history_for_model(turns), mock_text):
-        full.append(chunk)
-        yield sse({"delta": chunk})
-except Exception:
-    pass
-reply = "".join(full).strip()
-if not reply:
-    # Live AI refused or failed — fall back to the in-character
-    # canned reply instead of leaving the user hanging.
-    reply = mock_text
-    yield sse({"delta": mock_text})
-
+            for chunk in ai.stream(system, _history_for_model(past), mock_text):
+                full.append(chunk)
+                yield sse({"delta": chunk})
+            reply = "".join(full).strip()
             msg = Message(user_id=uid, coach_id=body.coach_id, role="coach", text=reply)
             db.add(msg)
             db.commit()
@@ -762,36 +741,21 @@ def sim_start(body: SimStartBody, user: User = Depends(get_current_user), db: Se
     db.commit()
     db.refresh(sim)
 
-   system = P.date_system(persona, _user_ctx(user, db))
-mock_opening = _mock_opening(persona)
-try:
-    opening = ai.complete(
-        system,
-        [{"role": "user", "content": "Send your opening message to start the conversation. Stay in character, keep it short and text-like."}],
-        mock_opening,
-        max_tokens=200,
-    ).strip()
-except Exception:
-    opening = ""
-if not opening:
-    # Live AI refused or failed (safety filter, demand spike, etc.) —
-    # fall back to the in-character canned opener instead of 500ing.
-    opening = mock_opening
-
-msg = SimMessage(simulation_id=sim.id, role="date", text=opening)
-db.add(msg)
-db.commit()
-db.refresh(msg)
-return {"simulation_id": sim.id, "opening": {"id": msg.id, "text": opening}}
-
-    ).strip()
-except Exception:
-    opening = ""
-if not opening:
-    # Live AI refused or failed (safety filter, demand spike, etc.) —
-    # fall back to the in-character canned opener instead of 500ing.
-    opening = mock_opening
-
+    system = P.date_system(persona, _user_ctx(user, db))
+    mock_opening = _mock_opening(persona)
+    try:
+        opening = ai.complete(
+            system,
+            [{"role": "user", "content": "Send your opening message to start the conversation. Stay in character, keep it short and text-like."}],
+            mock_opening,
+            max_tokens=200,
+        ).strip()
+    except Exception:
+        opening = ""
+    if not opening:
+        # Live AI refused or failed (safety filter, demand spike, etc.) —
+        # fall back to the in-character canned opener instead of 500ing.
+        opening = mock_opening
     msg = SimMessage(simulation_id=sim.id, role="date", text=opening)
     db.add(msg)
     db.commit()
@@ -832,10 +796,18 @@ def sim_message(body: SimMessageBody, user: User = Depends(get_current_user), db
             system = P.date_system(persona, uinfo)
             mock_text = _mock_date_reply(persona, body.message)
             full = []
-            for chunk in ai.stream(system, _history_for_model(turns), mock_text):
-                full.append(chunk)
-                yield sse({"delta": chunk})
+            try:
+                for chunk in ai.stream(system, _history_for_model(turns), mock_text):
+                    full.append(chunk)
+                    yield sse({"delta": chunk})
+            except Exception:
+                pass
             reply = "".join(full).strip()
+            if not reply:
+                # Live AI refused or failed — fall back to the in-character
+                # canned reply instead of leaving the user hanging.
+                reply = mock_text
+                yield sse({"delta": mock_text})
             msg = SimMessage(simulation_id=sim.id, role="date", text=reply)
             db.add(msg)
             db.commit()
@@ -1154,11 +1126,11 @@ def tools_reply(body: ReplyBody, user: User = Depends(get_current_user)):
         ) or "(no conversation provided)"
     mock = json.dumps({
         "options": [
-            {"reply": "Haha, that's one way to put it 😄 what was the highlight of your week though?",
+            {"reply": "Haha, that's one way to put it \U0001f604 what was the highlight of your week though?",
              "strategy": "Playful deflection + redirect: acknowledge lightly, then steer to something real. Shows confidence without chasing the joke."},
             {"reply": "Interesting take. Tell me the story behind that — I'm curious.",
              "strategy": "Curiosity hook: invites them to invest more in the conversation. People love talking about themselves."},
-            {"reply": "Bold 😏 I like it. But fair warning, I ask better questions than I answer.",
+            {"reply": "Bold \U0001f60f I like it. But fair warning, I ask better questions than I answer.",
              "strategy": "Mirrored energy + playful challenge: matches their boldness and adds light tension. Keeps you from sounding needy."},
         ]
     })
@@ -1177,7 +1149,6 @@ def tools_reply(body: ReplyBody, user: User = Depends(get_current_user)):
     except Exception:
         options = None
     if not options:
-        # Try to salvage: if the model returned prose, wrap it as a single option set fallback.
         options = json.loads(mock)["options"]
     options = [
         {"reply": str(o.get("reply", "")), "strategy": str(o.get("strategy", ""))}
@@ -1257,19 +1228,13 @@ class FreshRestartBody(BaseModel):
 
 @api.post("/fresh-restart")
 def fresh_restart(body: FreshRestartBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if body.confirm is not True:
-        raise HTTPException(status_code=400, detail="confirm must be true")
     uid = user.id
-    # Clear chat messages
     db.query(Message).filter(Message.user_id == uid).delete(synchronize_session=False)
-    # Clear simulations + their turns
     sim_ids = [s.id for s in db.query(Simulation.id).filter(Simulation.user_id == uid).all()]
     if sim_ids:
         db.query(SimMessage).filter(SimMessage.simulation_id.in_(sim_ids)).delete(synchronize_session=False)
         db.query(Simulation).filter(Simulation.user_id == uid).delete(synchronize_session=False)
-    # Clear check-in seen markers
     db.query(CheckinSeen).filter(CheckinSeen.user_id == uid).delete(synchronize_session=False)
-    # KEEP: scorecards, custom dates, onboarding, user identity/coach pick
     user.hearts = 100
     db.commit()
     db.refresh(user)
