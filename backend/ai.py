@@ -19,7 +19,7 @@ MOCK = os.environ.get("MOCK_AI", "").lower() in ("1", "true", "yes")
 ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY")
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-5")
 
-GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
+GEMINI_KEY = (os.environ.get("GEMINI_API_KEY") or "").strip()
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
@@ -31,6 +31,8 @@ if not _provider and not MOCK:
         _provider = "anthropic"
     else:
         _provider = "none"
+
+print(f"[ai] provider={_provider} model={GEMINI_MODEL if _provider == 'gemini' else ANTHROPIC_MODEL if _provider == 'anthropic' else '-'}", flush=True)
 
 _anthropic_client = None
 
@@ -110,7 +112,9 @@ def _gemini_stream(system: str, messages: list, max_tokens: int):
         "POST", url, headers=_gemini_headers(),
         json=_gemini_body(system, messages, max_tokens), timeout=120.0,
     ) as resp:
-        resp.raise_for_status()
+        if resp.status_code >= 400:
+            body = resp.read().decode(errors="replace")[:500]
+            raise RuntimeError(f"Gemini API error {resp.status_code}: {body}")
         for line in resp.iter_lines():
             if not line.startswith("data: "):
                 continue
@@ -131,7 +135,8 @@ def _gemini_complete(system: str, messages: list, max_tokens: int) -> str:
         url, headers=_gemini_headers(),
         json=_gemini_body(system, messages, max_tokens), timeout=120.0,
     )
-    resp.raise_for_status()
+    if resp.status_code >= 400:
+        raise RuntimeError(f"Gemini API error {resp.status_code}: {resp.text[:500]}")
     return _gemini_text_from_chunk(resp.json())
 
 
