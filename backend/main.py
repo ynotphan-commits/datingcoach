@@ -156,18 +156,50 @@ def _mock_opening(persona: dict) -> str:
 
 
 def _mock_date_reply(persona: dict, message: str) -> str:
-    name = persona.get("name", "")
+    """Fallback date reply when all AI providers fail.
+
+    Varied, in-character, and never quotes the user back — quoting is what
+    makes a fallback feel like "repeat mode". Variant picked by message hash
+    so consecutive messages don't repeat the same line.
+    """
     style = (persona.get("personality") or "").lower()
-    snippet = message.strip()[:40]
-    if "love-bomb" in style or "love-bomb" in style.replace("-", ""):
-        return f"omg stoppp \U0001f970 \"{snippet}\" — see?? this is exactly why I already know you're different. I've never clicked this fast with anyone"
+    style = style.replace("-", "")
+    variant = abs(hash(message.strip().lower())) % 4
+
+    if "lovebomb" in style:
+        return [
+            "okay wait, how are you already my favorite person to talk to?? this is dangerous 😳",
+            "you're gonna make me blush through the screen, stoppp 🥰 tell me more though",
+            "I swear I've never vibed with someone this fast. what are you doing to me lol",
+            "hold on, I need a second — you're actually making my day right now 🥺",
+        ][variant]
     if "hot/cold" in style:
-        return "haha yeah maybe. anyway what are you up to this weekend" if len(message) > 20 else "lol"
-    if "future-fake" in style:
-        return f"yesss I love that \u2728 \"{snippet}\" — okay we're definitely doing that wine tasting trip I mentioned, I'm already planning it in my head"
+        return [
+            "haha yeah maybe. anyway what are you up to this weekend",
+            "lol nice. sorry, got distracted — what were you saying?",
+            "that's cool I guess. hey, are you free friday or nah",
+            "lol",
+        ][variant]
+    if "futurefake" in style:
+        return [
+            "yesss I love that energy ✨ okay so I'm already picturing us doing that wine tasting trip, it's gonna be perfect",
+            "omg yes!! we are SO doing that together. I'm literally planning it in my head right now 🥂",
+            "that's exactly the kind of thing we'd do on our third date, I'm calling it now ✨",
+            "love that for us 😍 adding it to our future plans list (which is getting long lol)",
+        ][variant]
     if "neg" in style:
-        return f"lol \"{snippet}\" — that was almost smooth. almost \U0001f60f keep trying though, it's cute"
-    return f"haha fair \U0001f604 \"{snippet}\" — okay your turn, ask me something real"
+        return [
+            "lol that was almost smooth. almost 😏 keep trying though, it's cute",
+            "cute. you're trying really hard right now and I respect the effort 😌",
+            "hmm, I'll give that a 6/10. you can do better, I believe in you 😏",
+            "not bad... for an amateur 😏",
+        ][variant]
+    return [
+        "haha fair 😄 okay your turn — ask me something real",
+        "lol okay, I like that. so what's your most controversial food opinion?",
+        "nice, noted 😌 alright, tell me something your friends would say about you",
+        "haha I appreciate the honesty. what do you do when you're not on here?",
+    ][variant]
 
 
 def _mock_feedback(persona: dict, turns: int) -> str:
