@@ -778,6 +778,20 @@ if not opening:
     # fall back to the in-character canned opener instead of 500ing.
     opening = mock_opening
 
+msg = SimMessage(simulation_id=sim.id, role="date", text=opening)
+db.add(msg)
+db.commit()
+db.refresh(msg)
+return {"simulation_id": sim.id, "opening": {"id": msg.id, "text": opening}}
+
+    ).strip()
+except Exception:
+    opening = ""
+if not opening:
+    # Live AI refused or failed (safety filter, demand spike, etc.) —
+    # fall back to the in-character canned opener instead of 500ing.
+    opening = mock_opening
+
     msg = SimMessage(simulation_id=sim.id, role="date", text=opening)
     db.add(msg)
     db.commit()
