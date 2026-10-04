@@ -20,7 +20,7 @@ ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY")
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-5")
 
 GEMINI_KEY = (os.environ.get("GEMINI_API_KEY") or "").strip()
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
 GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
 _provider = os.environ.get("AI_PROVIDER", "").lower().strip()
@@ -142,47 +142,75 @@ def _gemini_complete(system: str, messages: list, max_tokens: int) -> str:
 
 # ---------------------------------------------------------------- public API
 def stream(system: str, messages: list, mock_text: str, max_tokens: int = 1024):
-    """Yield text chunks. In MOCK mode yields from mock_text, no API call."""
+    """Yield text chunks. In MOCK mode yields from mock_text, no API call.
+
+    If the live provider fails (rate limit, demand spike, safety block),
+    falls back to the mock text instead of raising — the caller always gets
+    *something* usable. Only raises when no provider is configured at all.
+    """
     if MOCK:
         yield from _mock_chunks(mock_text)
         return
-    if _provider == "gemini":
-        yield from _gemini_stream(system, messages, max_tokens)
-        return
-    if _provider == "anthropic":
-        resp = _anthropic().messages.create(
-            model=ANTHROPIC_MODEL, max_tokens=max_tokens,
-            system=system, messages=messages, stream=True,
+    if _provider not in ("gemini", "anthropic"):
+        raise RuntimeError(
+            "No AI provider configured. Set GEMINI_API_KEY (free, https://aistudio.google.com/apikey) "
+            "or ANTHROPIC_API_KEY, or MOCK_AI=true for testing."
         )
-        for event in resp:
-            if event.type == "content_block_delta":
-                text = getattr(event.delta, "text", None)
-                if text:
-                    yield text
-        return
-    raise RuntimeError(
-        "No AI provider configured. Set GEMINI_API_KEY (free, https://aistudio.google.com/apikey) "
-        "or ANTHROPIC_API_KEY, or MOCK_AI=true for testing."
-    )
+    yielded = False
+    try:
+        if _provider == "gemini":
+            for chunk in _gemini_stream(system, messages, max_tokens):
+                yielded = True
+                yield chunk
+        else:
+            resp = _anthropic().messages.create(
+                model=ANTHROPIC_MODEL, max_tokens=max_tokens,
+                system=system, messages=messages, stream=True,
+            )
+            for event in resp:
+                if event.type == "content_block_delta":
+                    text = getattr(event.delta, "text", None)
+                    if text:
+                        yielded = True
+                        yield text
+    except Exception as e:
+        print(f"[ai] stream failed ({_provider}), falling back to mock: {e}", flush=True)
+    if not yielded:
+        yield from _mock_chunks(mock_text)
 
 
 def complete(system: str, messages: list, mock_text: str, max_tokens: int = 1024) -> str:
-    """Non-streaming completion. In MOCK mode returns mock_text."""
+    """Non-streaming completion. In MOCK mode returns mock_text.
+
+    Falls back to mock_text when the live provider fails, instead of raising.
+    Only raises when no provider is configured at all.
+    """
     if MOCK:
         return mock_text
-    if _provider == "gemini":
-        return _gemini_complete(system, messages, max_tokens)
-    if _provider == "anthropic":
-        resp = _anthropic().messages.create(
-            model=ANTHROPIC_MODEL, max_tokens=max_tokens, system=system, messages=messages
+    if _provider not in ("gemini", "anthropic"):
+        raise RuntimeError(
+            "No AI provider configured. Set GEMINI_API_KEY (free, https://aistudio.google.com/apikey) "
+            "or ANTHROPIC_API_KEY, or MOCK_AI=true for testing."
         )
-        parts = []
-        for block in resp.content:
-            text = getattr(block, "text", None)
-            if text:
-                parts.append(text)
-        return "".join(parts)
-    raise RuntimeError(
-        "No AI provider configured. Set GEMINI_API_KEY (free, https://aistudio.google.com/apikey) "
-        "or ANTHROPIC_API_KEY, or MOCK_AI=true for testing."
-    )
+    try:
+        if _provider == "gemini":
+            text = _gemini_complete(system, messages, max_tokens)
+            if text and text.strip():
+                return text
+            print("[ai] complete returned empty, falling back to mock", flush=True)
+        else:
+            resp = _anthropic().messages.create(
+                model=ANTHROPIC_MODEL, max_tokens=max_tokens, system=system, messages=messages
+            )
+            parts = []
+            for block in resp.content:
+                text = getattr(block, "text", None)
+                if text:
+                    parts.append(text)
+            text = "".join(parts)
+            if text and text.strip():
+                return text
+            print("[ai] complete returned empty, falling back to mock", flush=True)
+    except Exception as e:
+        print(f"[ai] complete failed ({_provider}), falling back to mock: {e}", flush=True)
+    return mock_text
