@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0c11" id="meta-theme">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script>
+(function(){try{var t=localStorage.getItem('dca_theme');if(!t){t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';}document.documentElement.setAttribute('data-theme',t);var m=document.getElementById('meta-theme');if(m)m.setAttribute('content',t==='light'?'#f4f5f8':'#0a0c11');}catch(e){}})();
+</script>
+<title>Dating Coach AI — full translator for modern dating</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ AUTH ============ -->
+  <section id="view-auth" class="view">
+    <div class="auth-wrap">
+      <div class="brand">
+        <div class="brand-mark">◍</div>
+        <h1>Dating Coach AI</h1>
+        <p class="tagline">full translator for modern dating</p>
+      </div>
+      <p class="auth-sub">Not a dating app. A training gym — practice real conversations, learn to spot red flags, and get coached on your game.</p>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" type="button">Log in</button>
+        <button class="auth-tab" id="tab-signup" type="button">Sign up</button>
+      </div>
+      <form id="form-auth" autocomplete="on">
+        <div id="field-name" class="field hidden">
+          <label for="auth-name">What should your coach call you?</label>
+          <input id="auth-name" type="text" placeholder="Your name" autocomplete="nickname">
+        </div>
+        <div class="field">
+          <label for="auth-email">Email</label>
+          <input id="auth-email" type="email" placeholder="you@example.com" required autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="auth-password">Password</label>
+          <input id="auth-password" type="password" placeholder="••••••••" required autocomplete="current-password" minlength="6">
+        </div>
+        <div id="auth-error" class="form-error hidden"></div>
+        <button class="btn btn-primary btn-block" id="btn-auth-submit" type="submit">Log in</button>
+      </form>
+      <p class="auth-fine">Real coaches. Zero pickup lines — ever.</p>
+    </div>
+  </section>
+
+  <!-- ============ ONBOARDING ============ -->
+  <section id="view-onboarding" class="view">
+    <div class="ob-wrap">
+      <div class="ob-head">
+        <div class="brand-mark sm">◍</div>
+        <div>
+          <h2>First-date interview</h2>
+          <p class="muted">Your coach reads every word of this. Take your time — there's no clock here.</p>
+        </div>
+      </div>
+      <div class="progress"><div class="progress-fill" id="ob-progress"></div></div>
+      <div class="ob-step-label" id="ob-step-label"></div>
+      <div id="ob-questions"></div>
+      <div class="ob-nav">
+        <button class="btn btn-ghost" id="btn-ob-back" type="button">Back</button>
+        <button class="btn btn-primary" id="btn-ob-next" type="button">Continue</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COACH PICKER ============ -->
+  <section id="view-pick" class="view">
+    <div class="pick-wrap">
+      <div class="pick-head">
+        <h2>Choose your coach</h2>
+        <p class="muted">Every coach works with everyone. Pick the voice you want in your corner — switch anytime.</p>
+      </div>
+      <div id="coach-cards" class="coach-cards"></div>
+      <div class="locked-slot" id="locked-slot"></div>
+      <p class="pick-fine muted">They train you. They don't flatter you. That's the job.</p>
+    </div>
+  </section>
+
+  <!-- ============ MAIN APP ============ -->
+  <section id="view-main" class="view">
+    <header class="app-header">
+      <div class="app-brand"><span class="brand-mark sm">◍</span><span class="app-name">Dating Coach AI</span></div>
+      <div class="header-actions">
+        <button class="icon-btn" id="btn-theme" type="button" aria-label="Toggle dark mode"></button>
+        <button class="hearts-pill" id="hearts-pill" type="button" title="Your hearts">
+          <span class="heart">♥</span><span id="hearts-count">0</span>
+        </button>
+      </div>
+    </header>
+
+    <div id="checkin-area"></div>
+
+    <!-- PRACTICE TAB -->
+    <main id="tab-practice" class="tab active">
+      <div class="tab-head">
+        <h2>Practice dates</h2>
+        <p class="muted">Reps before the real thing. Your date will test you. Your coach breaks down the tape.</p>
+      </div>
+      <button class="btn btn-primary btn-block" id="btn-custom-date" type="button">+ Build a custom date</button>
+      <div id="date-cards" class="date-grid"></div>
+      <div id="recent-sims"></div>
+    </main>
+
+    <!-- COACHES TAB -->
+    <main id="tab-coaches" class="tab">
+      <div class="coach-chat-head" id="coach-chat-head"></div>
+      <div class="chat-shell">
+        <div id="coach-load-older" class="load-older hidden">
+          <button class="btn btn-ghost btn-sm" id="btn-load-older" type="button">Load older messages</button>
+        </div>
+        <div id="coach-chat-list" class="chat-list"></div>
+        <form id="coach-composer" class="composer">
+          <input id="coach-input" type="text" placeholder="Talk to your coach…" autocomplete="off" maxlength="2000">
+          <button class="send-btn" id="coach-send" type="submit" aria-label="Send"></button>
+        </form>
+      </div>
+    </main>
+
+    <!-- TOOLS TAB -->
+    <main id="tab-tools" class="tab">
+      <div class="tab-head">
+        <h2>Real-game tools</h2>
+        <p class="muted">For the conversations happening on your phone right now.</p>
+      </div>
+      <div class="card tool-card">
+        <h3>Help Me Reply</h3>
+        <p class="muted sm">Paste the conversation. Get 2–3 replies that sound like you on your best day — each with the strategy behind it.</p>
+        <textarea id="tool-reply-input" rows="5" placeholder="Paste the conversation here…"></textarea>
+        <button class="btn btn-primary btn-block" id="btn-tool-reply" type="button"><span class="btn-label">Get replies</span></button>
+        <div id="tool-reply-out" class="tool-out"></div>
+      </div>
+      <div class="card tool-card">
+        <h3>Decode This</h3>
+        <p class="muted sm">Paste a message you received. Get the subtext, the tone read, and any red flags hiding in it.</p>
+        <textarea id="tool-decode-input" rows="4" placeholder="Paste their message here…"></textarea>
+        <button class="btn btn-primary btn-block" id="btn-tool-decode" type="button"><span class="btn-label">Decode it</span></button>
+        <div id="tool-decode-out" class="tool-out"></div>
+      </div>
+    </main>
+
+    <!-- PATTERNS TAB -->
+    <main id="tab-patterns" class="tab">
+      <div class="tab-head">
+        <h2>Your Patterns</h2>
+        <p class="muted">A living mirror — what the gym has learned about how you date. Updates as you train.</p>
+      </div>
+      <div id="patterns-body"><div class="skel">Reading your file…</div></div>
+    </main>
+
+    <!-- PROFILE TAB -->
+    <main id="tab-profile" class="tab">
+      <div class="tab-head"><h2>Profile</h2></div>
+      <div class="card">
+        <div class="profile-row">
+          <div class="profile-id">
+            <div class="profile-name" id="profile-name">—</div>
+            <div class="profile-email muted sm" id="profile-email">—</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="btn-edit-name" type="button">Edit</button>
+        </div>
+        <div class="profile-row">
+          <span class="muted">Coach</span>
+          <button class="btn btn-ghost btn-sm" id="btn-switch-coach" type="button">—</button>
+        </div>
+        <div class="profile-row">
+          <span class="muted">Hearts</span>
+          <span class="hearts-inline"><span class="heart">♥</span> <b id="profile-hearts">0</b></span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Your numbers</h3>
+        <div id="profile-stats" class="stats-grid"></div>
+      </div>
+      <div class="card">
+        <h3>Date debriefs</h3>
+        <div id="profile-scorecards" class="scorecard-list"></div>
+      </div>
+      <div class="card">
+        <h3>Check-ins</h3>
+        <div id="profile-checkins"></div>
+      </div>
+      <div class="card danger-zone">
+        <h3>Fresh restart</h3>
+        <p class="muted sm">Wipe your hearts and stats and start the climb over. Your history stays.</p>
+        <button class="btn btn-danger btn-block" id="btn-fresh-restart" type="button">Fresh restart</button>
+      </div>
+      <button class="btn btn-ghost btn-block" id="btn-logout" type="button">Log out</button>
+      <div class="profile-spacer"></div>
+    </main>
+
+    <nav class="tabbar">
+      <button class="tab-btn active" data-tab="practice" type="button"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Practice</span></button>
+      <button class="tab-btn" data-tab="coaches" type="button"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span>Coaches</span></button>
+      <button class="tab-btn" data-tab="tools" type="button"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span><span>Tools</span></button>
+      <button class="tab-btn" data-tab="patterns" type="button"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span><span>Patterns</span></button>
+      <button class="tab-btn" data-tab="profile" type="button"><span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span>Profile</span></button>
+    </nav>
+  </section>
+
+  <!-- ============ PRACTICE DATE SIM ============ -->
+  <section id="view-sim" class="view">
+    <header class="sim-header">
+      <div class="sim-id" id="sim-id"></div>
+      <div class="sim-actions">
+        <button class="btn btn-ghost btn-sm" id="btn-ask-coach" type="button">Ask Coach</button>
+        <button class="btn btn-ghost btn-sm" id="btn-end-date" type="button">End date</button>
+      </div>
+    </header>
+    <div class="chat-shell sim-shell">
+      <div id="sim-chat-list" class="chat-list"></div>
+      <form id="sim-composer" class="composer">
+        <input id="sim-input" type="text" placeholder="Say something…" autocomplete="off" maxlength="2000">
+        <button class="send-btn" id="sim-send" type="submit" aria-label="Send"></button>
+      </form>
+    </div>
+    <!-- Ask Coach lifeline slide-over: date stays visible underneath -->
+    <div id="lifeline-panel" class="lifeline hidden" aria-label="Ask your coach">
+      <div class="lifeline-head">
+        <div class="lifeline-coach" id="lifeline-coach"></div>
+        <button class="btn btn-ghost btn-sm" id="btn-lifeline-close" type="button">Close</button>
+      </div>
+      <div class="lifeline-note muted sm">Mid-date lifeline — your date can't see this. Ask, get one move, get back in there.</div>
+      <div id="lifeline-thread" class="lifeline-thread"></div>
+      <form id="lifeline-form" class="composer lifeline-composer">
+        <input id="lifeline-input" type="text" placeholder="Ask your coach…" autocomplete="off" maxlength="500">
+        <button class="send-btn" id="lifeline-send" type="submit" aria-label="Send"></button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ FEEDBACK ============ -->
+  <section id="view-feedback" class="view">
+    <div class="fb-wrap">
+      <h2>Date debrief</h2>
+      <div class="hearts-burst" id="fb-hearts"></div>
+      <div class="card">
+        <h3>Coach feedback</h3>
+        <div id="fb-feedback" class="markdown"></div>
+      </div>
+      <div class="card">
+        <h3>Scorecard</h3>
+        <div id="fb-scorecard"></div>
+      </div>
+      <div class="fb-actions">
+        <button class="btn btn-ghost btn-block" id="btn-fb-practice" type="button">Run it back</button>
+        <button class="btn btn-primary btn-block" id="btn-fb-coach" type="button">Talk to my coach</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="modal-root"></div>
+  <div id="toast-root"></div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
