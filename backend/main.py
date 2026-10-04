@@ -753,13 +753,22 @@ def sim_start(body: SimStartBody, user: User = Depends(get_current_user), db: Se
     db.commit()
     db.refresh(sim)
 
-    system = P.date_system(persona, _user_ctx(user, db))
+   system = P.date_system(persona, _user_ctx(user, db))
+mock_opening = _mock_opening(persona)
+try:
     opening = ai.complete(
         system,
         [{"role": "user", "content": "Send your opening message to start the conversation. Stay in character, keep it short and text-like."}],
-        _mock_opening(persona),
+        mock_opening,
         max_tokens=200,
     ).strip()
+except Exception:
+    opening = ""
+if not opening:
+    # Live AI refused or failed (safety filter, demand spike, etc.) —
+    # fall back to the in-character canned opener instead of 500ing.
+    opening = mock_opening
+
     msg = SimMessage(simulation_id=sim.id, role="date", text=opening)
     db.add(msg)
     db.commit()
