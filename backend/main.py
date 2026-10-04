@@ -623,10 +623,19 @@ def chat(body: ChatBody, user: User = Depends(get_current_user)):
             system = _coach_system(body.coach_id, uinfo)
             mock_text = _mock_chat_text(body.coach_id, body.message)
             full = []
-            for chunk in ai.stream(system, _history_for_model(past), mock_text):
-                full.append(chunk)
-                yield sse({"delta": chunk})
-            reply = "".join(full).strip()
+try:
+    for chunk in ai.stream(system, _history_for_model(turns), mock_text):
+        full.append(chunk)
+        yield sse({"delta": chunk})
+except Exception:
+    pass
+reply = "".join(full).strip()
+if not reply:
+    # Live AI refused or failed — fall back to the in-character
+    # canned reply instead of leaving the user hanging.
+    reply = mock_text
+    yield sse({"delta": mock_text})
+
             msg = Message(user_id=uid, coach_id=body.coach_id, role="coach", text=reply)
             db.add(msg)
             db.commit()
