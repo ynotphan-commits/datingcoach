@@ -100,30 +100,45 @@ PRESET_DATES = [
 # ---------------------------------------------------------------- mock canned content
 
 def _mock_chat_text(coach_id: str, message: str) -> str:
-    snippet = message.strip()[:60]
+    """Fallback coach reply when all AI providers fail. Never quotes the user."""
+    variant = abs(hash(message.strip().lower())) % 3
     if coach_id == "nia":
-        return (
-            f"Okay, let's triage this. You said: \"{snippet}\" — "
-            "here's my honest read: you're overthinking the text and underthinking the pattern. "
+        return [
+            "Okay, let's triage this. Here's my honest read: you're overthinking the text and underthinking the pattern. "
             "Watch what they DO over the next 48 hours, not what they say tonight. "
-            "If the energy isn't matched, you pull back. That's the whole game. "
-            "Want me to help you draft the next move, or do you want the hard truth first?"
-        )
+            "If the energy isn't matched, you pull back. That's the whole game.",
+            "Alright, nurse mode on. The symptom you're describing? Classic over-investment early. "
+            "Prescription: match their effort, not their words. Give it two days and watch the pattern, not the promises. "
+            "What's your gut telling you that you're ignoring?",
+            "Let's cut to it — what do you actually want here? Because the way you're talking, "
+            "you're negotiating with yourself instead of reading the situation straight. "
+            "Name what you want out loud, then check if their actions line up. That's your answer.",
+        ][variant]
     if coach_id == "marcus":
-        return (
-            f"You said: \"{snippet}\" — alright, let's cut the fluff. "
-            "What's the actual effort here? Because from where I'm standing, "
+        return [
+            "Alright, let's cut the fluff. What's the actual effort here? Because from where I'm standing, "
             "you're negotiating with yourself instead of executing. "
-            "Here's your rep: train today, text with intent or don't text at all, "
-            "and stop waiting to 'feel ready.' Where are you coasting right now — "
-            "be honest, I can take it."
-        )
-    return (
-        f"I hear you — \"{snippet}\" — and it's completely normal to feel that way. "
+            "Train today, text with intent or don't text at all. Where are you coasting — be honest.",
+            "Listen. Nobody's coming to save your dating life — that's YOUR rep to run. "
+            "Stop waiting to 'feel ready.' Discipline first, confidence follows. "
+            "What's one thing you can do TODAY that the old you would've avoided?",
+            "Real talk: you're either building or you're stalling, there's no in-between. "
+            "I don't do excuses, I do reps. So what's the move — and don't tell me what you SHOULD do, "
+            "tell me what you're actually gonna do before tonight.",
+        ][variant]
+    return [
+        "I hear you, and it's completely normal to feel that way. "
         "Here's what I'd sit with: the right person makes things feel clearer over time, not more confusing. "
         "Notice how your body feels after interacting with them — calm or knotted up? "
-        "That answer is usually wiser than any text analysis. Tell me more about how it left you feeling."
-    )
+        "That answer is usually wiser than any text analysis.",
+        "Thank you for trusting me with that. Let's breathe through it together for a second. "
+        "What I'm hearing underneath is someone who cares deeply and is afraid of getting it wrong. "
+        "You don't have to be perfect — you just have to be present and honest. What would the brave version of you do?",
+        "That's such a human feeling, and I'm glad you named it. Here's a reframe: "
+        "confusion is information. When someone's into you, you don't have to decode it. "
+        "So instead of analyzing their words, ask yourself — do I feel chosen, or do I feel like I'm auditioning?",
+    ][variant]
+
 
 
 def _mock_opening(persona: dict) -> str:
