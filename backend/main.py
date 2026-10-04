@@ -1001,24 +1001,25 @@ def sim_history(
 # ---------------------------------------------------------------- ask-coach lifeline
 
 def _mock_lifeline_text(coach_id: str, question: str) -> str:
-    snippet = question.strip()[:60]
+    """Fallback lifeline advice. Never quotes the user."""
     if coach_id == "marcus":
         return (
-            f"You asked: \"{snippet}\" — here's your move: stop thinking, execute. "
+            "Here's your move: stop thinking, execute. "
             "One honest sentence, hold frame, then flip it back on them. "
             "Backbone now, analysis later."
         )
     if coach_id == "maya":
         return (
-            f"Good instinct asking — \"{snippet}\". Here's the move: stay warm but boundaried. "
+            "Good instinct asking. Here's the move: stay warm but boundaried. "
             "Answer honestly in one or two sentences, then ask them the same question back. "
             "Reciprocity tells you everything."
         )
     return (
-        f"Quick triage on \"{snippet}\": don't answer the question they asked — answer the one "
+        "Quick triage: don't answer the question they asked — answer the one "
         "behind it. One calm, honest sentence, no over-explaining. Then flip it: \"what about you?\" "
         "Whoever's asking the questions is leading."
     )
+
 
 
 class AskCoachBody(BaseModel):
